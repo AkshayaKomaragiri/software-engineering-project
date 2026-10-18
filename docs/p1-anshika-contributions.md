@@ -8,6 +8,7 @@ This file documents my contributions to the team's shared Microsoft Word proposa
 
 ## Section 3.4 — Initial Use Cases
 
+![Rep Rank UML Use Case Diagram](RepRank_use_case_diagram.png)
  
 Expanded use case  —  copy this block for each of your two 
 

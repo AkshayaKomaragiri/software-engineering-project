@@ -8,4 +8,8 @@
 ### Quality Requirement QR-02
 <img width="705" height="190" alt="image" src="https://github.com/user-attachments/assets/479c56f9-b1ce-40ad-af93-90f0b6315d32" />
 
+## 4.1
+<img width="446" height="443" alt="image" src="https://github.com/user-attachments/assets/00cc8b4b-5353-4ec6-86a2-3f8b053d7f33" />
+
+
 

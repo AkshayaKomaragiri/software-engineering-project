@@ -51,3 +51,12 @@ Author: Anshika
 ### Changes and reasons (4.3)
 - New section: the rubric requires a self-review log of what each Lesson 13 check found and fixed.
 - Lists actor-column items for the domain model so cross-check K1 can run.
+
+## Section 10.3 Risks (updated)
+
+![alt text](image7.png)
+![alt text](image8.png)
+
+## Section 10.4 Repository
+
+![alt text](image.png)

@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1312" height="488" viewBox="0 0 1312 488" role="img" aria-labelledby="component-view-title component-view-description">
+  <title id="component-view-title">Rep Rank UML component view</title>
+  <desc id="component-view-description">Eight components lie inside Rep Rank. Supabase Auth and Supabase Database are external. A socket uses a named capability supplied by the same-named ball. Workout Interaction is offered to the user.</desc>
+  <style>
+    text { font-family: 'Segoe UI', Arial, sans-serif; fill: #162333; }
+    .boundary { fill: #f3f7fa; stroke: #537085; stroke-width: 1.6; }
+    .zone-name { font-size: 19px; font-weight: 650; fill: #204961; }
+    .zone-detail { font-size: 15px; fill: #435467; }
+    .card { fill: #fff; stroke: #59758b; stroke-width: 1.3; }
+    .divider, .component-icon { stroke: #59758b; stroke-width: 1.2; fill: #fff; }
+    .component { font-size: 18px; font-weight: 650; }
+    .capability { font-size: 16.5px; }
+    .provided { stroke: #285773; stroke-width: 1.9; fill: #fff; }
+    .required { stroke: #414d5a; stroke-width: 1.8; fill: none; }
+    .external .card { fill: #fffaf2; stroke: #826440; }
+    .external .divider, .external .component-icon { stroke: #826440; fill: #fffaf2; }
+    .external-link { fill: none; stroke: #826440; stroke-width: 1.7; }
+    .legend { font-size: 15.5px; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 8 8" markerWidth="7" markerHeight="7" refX="7" refY="4" orient="auto">
+      <path d="M1 1l6 3-6 3" fill="none" stroke="#826440" stroke-width="1.15"/>
+    </marker>
+  </defs>
+  <rect width="1312" height="488" fill="#fff"/>
+  <g id="rep-rank-boundary">
+    <rect class="boundary" x="9" y="13" width="1004" height="402" rx="10"/>
+    <text class="zone-name" x="22" y="37">Rep Rank</text>
+    <text class="zone-detail" x="117" y="37">Mobile app boundary</text>
+  </g>
+  <g id="external-services-label">
+    <text class="zone-name" x="1051" y="37">External services</text>
+  </g>
+  <g id="external-dependencies">
+    <path class="external-link" d="M1000 156H1051" marker-end="url(#arrow)"/>
+    <path class="external-link" d="M1000 387H1051" marker-end="url(#arrow)"/>
+  </g>
+  <g id="ui" class="app">
+    <title>UI</title>
+    <rect class="card" x="22" y="53" width="238" height="187" rx="7"/>
+    <path class="divider" d="M22 87h238"/>
+    <g class="component-icon" transform="translate(231 64)">
+      <rect x="3" y="0" width="15" height="12"/>
+      <rect x="0" y="2" width="7" height="3"/>
+      <rect x="0" y="7" width="7" height="3"/>
+    </g>
+    <text class="component" x="35" y="76">UI</text>
+    <g id="ui-provides-workout-interaction">
+      <g class="provided"><path d="M37 107h8"/><circle cx="50" cy="107" r="5"/></g>
+      <text class="capability" x="61" y="112">Workout Interaction</text>
+    </g>
+    <g id="ui-requires-workout-recording">
+      <g class="required"><path d="M37 131h8"/><path d="M51 125a6 6 0 0 0 0 12"/></g>
+      <text class="capability" x="61" y="136">Workout Recording</text>
+    </g>
+    <g id="ui-requires-workout-history">
+      <g class="required"><path d="M37 155h8"/><path d="M51 149a6 6 0 0 0 0 12"/></g>
+      <text class="capability" x="61" y="160">Workout History</text>
+    </g>
+    <g id="ui-requires-progress-summary">
+      <g class="required"><path d="M37 179h8"/><path d="M51 173a6 6 0 0 0 0 12"/></g>
+      <text class="capability" x="61" y="184">Progress Summary</text>
+    </g>
+    <g id="ui-requires-account-access">
+      <g class="required"><path d="M37 203h8"/><path d="M51 197a6 6 0 0 0 0 12"/></g>
+      <text class="capability" x="61" y="208">Account Access</text>
+    </g>
+    <g id="ui-requires-workout-sync">
+      <g class="required"><path d="M37 227h8"/><path d="M51 221a6 6 0 0 0 0 12"/></g>
+      <text class="capability" x="61" y="232">Workout Sync</text>
+    </g>
+  </g>
+  <g id="workout-logging" class="app">
+    <title>Workout Logging</title>
+    <rect class="card" x="273" y="53" width="238" height="138" rx="7"/>
+    <path class="divider" d="M273 87h238"/>
+    <g class="component-icon" transform="translate(482 64)">
+      <rect x="3" y="0" width="15" height="12"/>
+      <rect x="0" y="2" width="7" height="3"/>
+      <rect x="0" y="7" width="7" height="3"/>
+    </g>
+    <text class="component" x="286" y="76">Workout Logging</text>
+    <g id="workout-logging-provides-workout-recording">
+      <g class="provided"><path d="M288 107h8"/><circle cx="301" cy="107" r="5"/></g>
+      <text class="capability" x="312" y="112">Workout Recording</text>
+    </g>
+    <g id="workout-logging-requires-exercise-lookup">
+      <g class="required"><path d="M288 131h8"/><path d="M302 125a6 6 0 0 0 0 12"/></g>
+      <text class="capability" x="312" y="136">Exercise Lookup</text>
+    </g>
+    <g id="workout-logging-requires-workout-history">
+      <g class="required"><path d="M288 155h8"/><path d="M302 149a6 6 0 0 0 0 12"/></g>
+      <text class="capability" x="312" y="160">Workout History</text>
+    </g>
+    <g id="workout-logging-requires-workout-records">
+      <g class="required"><path d="M288 179h8"/><path d="M302 173a6 6 0 0 0 0 12"/></g>
+      <text class="capability" x="312" y="184">Workout Records</text>
+    </g>
+  </g>
+  <g id="exercise-catalog" class="app">
+    <title>Exercise Catalog</title>
+    <rect class="card" x="524" y="53" width="211" height="76" rx="7"/>
+    <path class="divider" d="M524 87h211"/>
+    <g class="component-icon" transform="translate(706 64)">
+      <rect x="3" y="0" width="15" height="12"/>
+      <rect x="0" y="2" width="7" height="3"/>
+      <rect x="0" y="7" width="7" height="3"/>
+    </g>
+    <text class="component" x="537" y="76">Exercise Catalog</text>
+    <g id="exercise-catalog-provides-exercise-lookup">
+      <g class="provided"><path d="M539 107h8"/><circle cx="552" cy="107" r="5"/></g>
+      <text class="capability" x="563" y="112">Exercise Lookup</text>
+    </g>
+  </g>
+  <g id="auth-gateway" class="app">
+    <title>Auth Gateway</title>
+    <rect class="card" x="748" y="53" width="252" height="115" rx="7"/>
+    <path class="divider" d="M748 87h252"/>
+    <g class="component-icon" transform="translate(971 64)">
+      <rect x="3" y="0" width="15" height="12"/>
+      <rect x="0" y="2" width="7" height="3"/>
+      <rect x="0" y="7" width="7" height="3"/>
+    </g>
+    <text class="component" x="761" y="76">Auth Gateway</text>
+    <g id="auth-gateway-provides-account-access">
+      <g class="provided"><path d="M763 107h8"/><circle cx="776" cy="107" r="5"/></g>
+      <text class="capability" x="787" y="112">Account Access</text>
+    </g>
+    <g id="auth-gateway-provides-account-context">
+      <g class="provided"><path d="M763 131h8"/><circle cx="776" cy="131" r="5"/></g>
+      <text class="capability" x="787" y="136">Account Context</text>
+    </g>
+    <g id="auth-gateway-requires-managed-authentication">
+      <g class="required"><path d="M763 155h8"/><path d="M777 149a6 6 0 0 0 0 12"/></g>
+      <text class="capability" x="787" y="160">Managed Authentication</text>
+    </g>
+  </g>
+  <g id="progress" class="app">
+    <title>Progress</title>
+    <rect class="card" x="22" y="259" width="238" height="98" rx="7"/>
+    <path class="divider" d="M22 293h238"/>
+    <g class="component-icon" transform="translate(231 270)">
+      <rect x="3" y="0" width="15" height="12"/>
+      <rect x="0" y="2" width="7" height="3"/>
+      <rect x="0" y="7" width="7" height="3"/>
+    </g>
+    <text class="component" x="35" y="282">Progress</text>
+    <g id="progress-provides-progress-summary">
+      <g class="provided"><path d="M37 313h8"/><circle cx="50" cy="313" r="5"/></g>
+      <text class="capability" x="61" y="318">Progress Summary</text>
+    </g>
+    <g id="progress-requires-workout-records">
+      <g class="required"><path d="M37 337h8"/><path d="M51 331a6 6 0 0 0 0 12"/></g>
+      <text class="capability" x="61" y="342">Workout Records</text>
+    </g>
+  </g>
+  <g id="history" class="app">
+    <title>History</title>
+    <rect class="card" x="273" y="259" width="238" height="98" rx="7"/>
+    <path class="divider" d="M273 293h238"/>
+    <g class="component-icon" transform="translate(482 270)">
+      <rect x="3" y="0" width="15" height="12"/>
+      <rect x="0" y="2" width="7" height="3"/>
+      <rect x="0" y="7" width="7" height="3"/>
+    </g>
+    <text class="component" x="286" y="282">History</text>
+    <g id="history-provides-workout-history">
+      <g class="provided"><path d="M288 313h8"/><circle cx="301" cy="313" r="5"/></g>
+      <text class="capability" x="312" y="318">Workout History</text>
+    </g>
+    <g id="history-requires-workout-records">
+      <g class="required"><path d="M288 337h8"/><path d="M302 331a6 6 0 0 0 0 12"/></g>
+      <text class="capability" x="312" y="342">Workout Records</text>
+    </g>
+  </g>
+  <g id="local-store" class="app">
+    <title>Local Store</title>
+    <rect class="card" x="524" y="259" width="211" height="98" rx="7"/>
+    <path class="divider" d="M524 293h211"/>
+    <g class="component-icon" transform="translate(706 270)">
+      <rect x="3" y="0" width="15" height="12"/>
+      <rect x="0" y="2" width="7" height="3"/>
+      <rect x="0" y="7" width="7" height="3"/>
+    </g>
+    <text class="component" x="537" y="282">Local Store</text>
+    <g id="local-store-provides-workout-records">
+      <g class="provided"><path d="M539 313h8"/><circle cx="552" cy="313" r="5"/></g>
+      <text class="capability" x="563" y="318">Workout Records</text>
+    </g>
+    <g id="local-store-requires-account-context">
+      <g class="required"><path d="M539 337h8"/><path d="M553 331a6 6 0 0 0 0 12"/></g>
+      <text class="capability" x="563" y="342">Account Context</text>
+    </g>
+  </g>
+  <g id="sync" class="app">
+    <title>Sync</title>
+    <rect class="card" x="748" y="259" width="252" height="139" rx="7"/>
+    <path class="divider" d="M748 293h252"/>
+    <g class="component-icon" transform="translate(971 270)">
+      <rect x="3" y="0" width="15" height="12"/>
+      <rect x="0" y="2" width="7" height="3"/>
+      <rect x="0" y="7" width="7" height="3"/>
+    </g>
+    <text class="component" x="761" y="282">Sync</text>
+    <g id="sync-provides-workout-sync">
+      <g class="provided"><path d="M763 313h8"/><circle cx="776" cy="313" r="5"/></g>
+      <text class="capability" x="787" y="318">Workout Sync</text>
+    </g>
+    <g id="sync-requires-workout-records">
+      <g class="required"><path d="M763 337h8"/><path d="M777 331a6 6 0 0 0 0 12"/></g>
+      <text class="capability" x="787" y="342">Workout Records</text>
+    </g>
+    <g id="sync-requires-account-context">
+      <g class="required"><path d="M763 361h8"/><path d="M777 355a6 6 0 0 0 0 12"/></g>
+      <text class="capability" x="787" y="366">Account Context</text>
+    </g>
+    <g id="sync-requires-cloud-workout-records">
+      <g class="required"><path d="M763 385h8"/><path d="M777 379a6 6 0 0 0 0 12"/></g>
+      <text class="capability" x="787" y="390">Cloud Workout Records</text>
+    </g>
+  </g>
+  <g id="supabase-auth" class="external">
+    <title>Supabase Auth</title>
+    <rect class="card" x="1051" y="102" width="249" height="76" rx="7"/>
+    <path class="divider" d="M1051 136h249"/>
+    <g class="component-icon" transform="translate(1271 113)">
+      <rect x="3" y="0" width="15" height="12"/>
+      <rect x="0" y="2" width="7" height="3"/>
+      <rect x="0" y="7" width="7" height="3"/>
+    </g>
+    <text class="component" x="1064" y="125">Supabase Auth</text>
+    <g id="supabase-auth-provides-managed-authentication">
+      <g class="provided"><path d="M1066 156h8"/><circle cx="1079" cy="156" r="5"/></g>
+      <text class="capability" x="1090" y="161">Managed Authentication</text>
+    </g>
+  </g>
+  <g id="supabase-database" class="external">
+    <title>Supabase Database</title>
+    <rect class="card" x="1051" y="333" width="249" height="76" rx="7"/>
+    <path class="divider" d="M1051 367h249"/>
+    <g class="component-icon" transform="translate(1271 344)">
+      <rect x="3" y="0" width="15" height="12"/>
+      <rect x="0" y="2" width="7" height="3"/>
+      <rect x="0" y="7" width="7" height="3"/>
+    </g>
+    <text class="component" x="1064" y="356">Supabase Database</text>
+    <g id="supabase-database-provides-cloud-workout-records">
+      <g class="provided"><path d="M1066 387h8"/><circle cx="1079" cy="387" r="5"/></g>
+      <text class="capability" x="1090" y="392">Cloud Workout Records</text>
+    </g>
+  </g>
+  <g id="notation-legend">
+    <g class="provided"><path d="M22 439h8"/><circle cx="35" cy="439" r="5"/></g>
+    <text class="legend" x="47" y="444">Provides</text>
+    <g class="required"><path d="M132 439h8"/><path d="M146 433a6 6 0 0 0 0 12"/></g>
+    <text class="legend" x="157" y="444">Requires</text>
+    <text class="legend" x="260" y="444">Matching capability names connect a required interface to its provider.</text>
+    <text class="legend" x="22" y="470">The strength training user uses Workout Interaction. Arrows identify dependencies that cross the app boundary.</text>
+  </g>
+</svg>

@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="556" viewBox="0 0 1200 556" role="img" aria-labelledby="title description">
+  <title id="title">Rep Rank UML deployment view</title>
+  <desc id="description">A Flutter app runs on an iOS or Android phone and uses an account-scoped SQLite file. Its Auth Gateway reaches Supabase Auth over HTTPS, and Sync reaches the Supabase Postgres database through the HTTPS Data API. Both network paths cross the device-to-provider trust boundary.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#25627e"/>
+    </marker>
+    <symbol id="document" viewBox="0 0 25 30">
+      <path d="M2 2H16L23 9V28H2ZM16 2V9H23" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+    </symbol>
+    <style>
+      text { font-family: Arial, sans-serif; fill: #16283a; }
+      .zone { font-size: 19px; font-weight: bold; letter-spacing: 0.6px; }
+      .stereotype { font-size: 17px; fill: #435c70; }
+      .node-title { font-size: 25px; font-weight: bold; }
+      .artifact-title { font-size: 21px; font-weight: bold; }
+      .detail { font-size: 18px; }
+      .path-title { font-size: 19px; font-weight: bold; fill: #174b67; }
+      .path-detail { font-size: 17px; fill: #344c60; }
+      .network { fill: none; stroke: #25627e; stroke-width: 2.5; marker-end: url(#arrow); }
+    </style>
+  </defs>
+
+  <rect width="1200" height="556" fill="#fff"/>
+
+  <g id="device-zone">
+    <text class="zone" x="25" y="31">USER DEVICE TRUST ZONE</text>
+    <path d="M25 62L39 50H564V526L550 538H25Z" fill="#d6e7f6" stroke="#486f91" stroke-width="2" stroke-linejoin="round"/>
+    <rect x="25" y="62" width="525" height="476" rx="2" fill="#f1f7fd" stroke="#486f91" stroke-width="2"/>
+    <path d="M550 62L564 50" stroke="#486f91" stroke-width="2"/>
+    <text class="stereotype" x="46" y="88">«device»</text>
+    <text class="node-title" x="46" y="116">Phone (iOS or Android)</text>
+
+    <g id="flutter-environment">
+      <rect x="46" y="133" width="483" height="274" rx="4" fill="#e4f0fa" stroke="#7290a8" stroke-width="1.6"/>
+      <text class="stereotype" x="64" y="160">«executionEnvironment»</text>
+      <text class="artifact-title" x="64" y="185">Flutter mobile app runtime</text>
+
+      <g id="app-artifact">
+        <rect x="64" y="200" width="447" height="188" rx="4" fill="#fff" stroke="#7290a8" stroke-width="1.6"/>
+        <use href="#document" x="471" y="215" width="24" height="29" style="color:#486f91"/>
+        <text class="stereotype" x="82" y="225">«artifact»</text>
+        <text class="artifact-title" x="82" y="251">Rep Rank mobile app</text>
+        <path d="M82 263H493" stroke="#c4d5e2" stroke-width="1"/>
+        <text class="detail" x="82" y="287">UI</text>
+        <text class="detail" x="82" y="311">Workout Logging</text>
+        <text class="detail" x="82" y="335">Exercise Catalog</text>
+        <text class="detail" x="82" y="359">Progress</text>
+        <text class="detail" x="301" y="287">Auth Gateway</text>
+        <text class="detail" x="301" y="311">History</text>
+        <text class="detail" x="301" y="335">Sync</text>
+        <text class="detail" x="301" y="359">Local Store</text>
+      </g>
+    </g>
+
+    <g id="sqlite-artifact">
+      <rect x="64" y="464" width="447" height="56" rx="4" fill="#fff" stroke="#7290a8" stroke-width="1.6"/>
+      <use href="#document" x="471" y="476" width="24" height="29" style="color:#486f91"/>
+      <text class="stereotype" x="82" y="485">«artifact»</text>
+      <text class="artifact-title" x="82" y="509">Account-scoped SQLite file</text>
+    </g>
+
+    <g id="local-file-access">
+      <path class="network" d="M89 388V462"/>
+      <text class="path-detail" x="107" y="431">Local Store → SQLite library</text>
+      <text class="path-detail" x="107" y="452">In-process file access</text>
+    </g>
+  </g>
+
+  <g id="provider-zone">
+    <text class="zone" x="825" y="31">MANAGED PROVIDER TRUST ZONE</text>
+    <path d="M825 62L839 50H1187V421L1173 433H825Z" fill="#d8eae4" stroke="#497b6c" stroke-width="2" stroke-linejoin="round"/>
+    <rect x="825" y="62" width="348" height="371" rx="2" fill="#eff8f4" stroke="#497b6c" stroke-width="2"/>
+    <path d="M1173 62L1187 50" stroke="#497b6c" stroke-width="2"/>
+    <text class="stereotype" x="846" y="88">«node»</text>
+    <text class="node-title" x="846" y="116">Managed Supabase cloud</text>
+
+    <g id="auth-service">
+      <rect x="847" y="145" width="305" height="105" rx="4" fill="#fff" stroke="#71988b" stroke-width="1.6"/>
+      <text class="stereotype" x="865" y="171">«executionEnvironment»</text>
+      <text class="artifact-title" x="865" y="200">Supabase Auth</text>
+      <text class="detail" x="865" y="225">Identity and sessions</text>
+    </g>
+
+    <g id="database-service">
+      <rect x="847" y="272" width="305" height="105" rx="4" fill="#fff" stroke="#71988b" stroke-width="1.6"/>
+      <text class="stereotype" x="865" y="298">«executionEnvironment»</text>
+      <text class="artifact-title" x="865" y="327">Supabase Database</text>
+      <text class="detail" x="865" y="352">Postgres workout records</text>
+    </g>
+  </g>
+
+  <g id="trust-boundary">
+    <path d="M693 46V534" fill="none" stroke="#64748b" stroke-width="1.8" stroke-dasharray="6 6"/>
+    <rect x="614" y="11" width="158" height="28" rx="14" fill="#eef2f6" stroke="#a4b0bc"/>
+    <text class="detail" x="693" y="31" text-anchor="middle">Trust boundary</text>
+  </g>
+
+  <g id="auth-communication-path">
+    <rect x="575" y="162" width="236" height="75" rx="4" fill="#fff"/>
+    <path class="network" d="M564 198H845"/>
+    <text class="path-title" x="693" y="185" text-anchor="middle">HTTPS (TLS) · Auth API</text>
+    <text class="path-detail" x="693" y="223" text-anchor="middle">Auth Gateway → Supabase Auth</text>
+  </g>
+
+  <g id="sync-communication-path">
+    <rect x="575" y="289" width="236" height="75" rx="4" fill="#fff"/>
+    <path class="network" d="M564 325H845"/>
+    <text class="path-title" x="693" y="312" text-anchor="middle">HTTPS (TLS) · Data API</text>
+    <text class="path-detail" x="693" y="350" text-anchor="middle">Sync → Supabase Database</text>
+  </g>
+</svg>

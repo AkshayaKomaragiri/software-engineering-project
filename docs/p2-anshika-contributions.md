@@ -60,3 +60,6 @@ Author: Anshika
 ## Section 10.4 Repository
 
 ![alt text](image.png)
+
+## Section 0.2 
+<img width="521" height="484" alt="image" src="https://github.com/user-attachments/assets/1d5a23ff-ddbb-4ed9-bf8b-adac5dce32f2" />

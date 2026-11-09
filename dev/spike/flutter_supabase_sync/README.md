@@ -116,5 +116,17 @@ Testing included:
 
 Both RLS security tests passed. Screen recordings documenting the tests are available in the project's GitHub security-validation issue, Issue 15.
 
+Screenshots comparing SQlite local database entries for each user to supabase database containing entries for both users.
+entries for user kwittlercollege@gmail.com:
+<img width="3840" height="2400" alt="image" src="https://github.com/user-attachments/assets/c22138b3-eef6-4ee4-8c4f-91facc7cd048" />
+
+entries for user kolyawittler2@gmail.com:
+<img width="3840" height="2400" alt="image" src="https://github.com/user-attachments/assets/44b11564-919e-4b1a-9b5f-9bbf4bc4bff7" />
+
+entries in supabase from both users:
+<img width="3840" height="2400" alt="image" src="https://github.com/user-attachments/assets/572071e5-5ccd-4477-91a9-62b6d216622a" />
+
+
+
 
 

@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<!--
+  Rep Rank — clickable UI prototype (CS 3354, Team 03)
+  Author: Anshika
+  UI only: sample data lives in memory and resets on reload. No database,
+  no real sign-in, no network calls.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rep Rank — UI Prototype</title>
+<style>
+  :root {
+    --ink: #1C1F23;
+    --graphite: #3B4046;
+    --slate: #6B7078;
+    --line: #E2DFD9;
+    --line-strong: #CFCBC3;
+    --paper: #F5F4F0;
+    --surface: #FFFFFF;
+    --sunken: #EDEBE6;
+    --accent: #9C3B26;
+    --accent-soft: #F2E3DE;
+    --accent-deep: #5E2216;
+    --success: #2F6A4F;
+    --success-soft: #E2EEE7;
+    --warning: #8A6417;
+    --warning-soft: #F4ECDB;
+    --error: #A12A2A;
+    --error-soft: #F6E1E1;
+    --radius: 10px;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font-family: var(--font);
+    color: var(--ink);
+    background: #E9E7E2;
+    -webkit-font-smoothing: antialiased;
+  }
+  button, input { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  .num { font-variant-numeric: tabular-nums; }
+
+  /* ---------- Page layout: reviewer panel + phone ---------- */
+  .stage {
+    min-height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 56px;
+    padding: 32px 24px;
+  }
+  .review {
+    width: 300px;
+    align-self: center;
+  }
+  .review h1 { font-size: 15px; letter-spacing: 2.4px; font-weight: 800; margin: 0 0 4px; display: flex; align-items: center; gap: 10px; }
+  .review p { color: var(--graphite); font-size: 14px; line-height: 1.5; margin: 8px 0 20px; }
+  .review .label { font-size: 11px; letter-spacing: .8px; font-weight: 600; color: var(--slate); text-transform: uppercase; margin: 20px 0 8px; }
+  .review ul { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--line-strong); }
+  .review li button {
+    width: 100%; display: flex; justify-content: space-between; align-items: center;
+    background: none; border: 0; border-bottom: 1px solid var(--line-strong);
+    padding: 11px 2px; text-align: left; font-size: 14px; color: var(--ink);
+  }
+  .review li button:hover { color: var(--accent); }
+  .review li button span { color: var(--slate); font-size: 12px; }
+  .review .note { font-size: 12px; color: var(--slate); margin-top: 18px; line-height: 1.5; }
+
+  .phone {
+    width: 390px; height: 820px;
+    border-radius: 44px;
+    background: var(--ink);
+    padding: 10px;
+    box-shadow: 0 30px 60px -30px rgba(28,31,35,.45), 0 0 0 1px rgba(28,31,35,.2);
+    flex: none;
+  }
+  .app {
+    position: relative;
+    width: 100%; height: 100%;
+    border-radius: 35px;
+    overflow: hidden;
+    background: var(--paper);
+    display: flex; flex-direction: column;
+  }
+  .statusbar {
+    height: 40px; flex: none; display: flex; align-items: center; justify-content: space-between;
+    padding: 0 26px; font-size: 13px; font-weight: 600;
+  }
+  @media (max-width: 860px) {
+    body { background: var(--paper); }
+    .stage { padding: 0; display: block; }
+    .review { display: none; }
+    .phone { width: 100%; height: 100dvh; border-radius: 0; padding: 0; box-shadow: none; background: var(--paper); }
+    .app { border-radius: 0; }
+    .statusbar { display: none; }
+  }
+
+  /* ---------- App chrome ---------- */
+  .appbar { height: 56px; flex: none; display: flex; align-items: center; gap: 4px; padding: 0 8px 0 16px; }
+  .appbar.has-back { padding-left: 4px; }
+  .appbar h2 { font-size: 20px; font-weight: 600; margin: 0; flex: 1; }
+  .icon-btn {
+    width: 48px; height: 48px; border-radius: 24px; border: 0; background: none;
+    display: inline-flex; align-items: center; justify-content: center; color: var(--ink);
+  }
+  .icon-btn:hover { background: var(--sunken); }
+  .icon-btn svg { width: 22px; height: 22px; }
+  .content { flex: 1; overflow-y: auto; padding: 4px 16px 28px; }
+  .content::-webkit-scrollbar { width: 0; }
+  .actionbar { flex: none; padding: 8px 16px 12px; background: var(--paper); }
+
+  .tabbar {
+    flex: none; height: 68px; display: grid; grid-template-columns: repeat(4, 1fr);
+    background: var(--surface); border-top: 1px solid var(--line);
+  }
+  .tab {
+    border: 0; background: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    font-size: 12px; font-weight: 500; color: var(--slate);
+  }
+  .tab .pill { width: 60px; height: 30px; border-radius: 15px; display: flex; align-items: center; justify-content: center; }
+  .tab svg { width: 22px; height: 22px; }
+  .tab.active { color: var(--ink); font-weight: 700; }
+  .tab.active .pill { background: var(--accent-soft); color: var(--accent-deep); }
+
+  /* ---------- Building blocks ---------- */
+  .wordmark { display: inline-flex; align-items: center; gap: 8px; font-weight: 800; letter-spacing: 2.4px; font-size: 15px; }
+  .wordmark.lg { font-size: 18px; gap: 10px; }
+  .mark { display: inline-flex; align-items: flex-end; gap: 2px; height: 18px; }
+  .mark i { display: block; width: 4px; border-radius: 1.5px; background: var(--ink); }
+  .mark i:nth-child(1) { height: 45%; } .mark i:nth-child(2) { height: 70%; } .mark i:nth-child(3) { height: 100%; background: var(--accent); }
+  .wordmark.lg .mark { height: 22px; } .wordmark.lg .mark i { width: 5px; }
+
+  .eyebrow { font-size: 11px; letter-spacing: .8px; font-weight: 600; color: var(--slate); text-transform: uppercase; }
+  .section-label { display: flex; align-items: center; justify-content: space-between; margin: 24px 0 8px; min-height: 24px; }
+  .h-date { font-size: 24px; font-weight: 600; letter-spacing: -.3px; margin: 4px 0 16px; }
+  .muted { color: var(--slate); }
+  .small { font-size: 12px; color: var(--slate); }
+  .body { font-size: 14px; line-height: 1.5; }
+
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+  .panel.pad { padding: 16px; }
+  .panel.sunken { background: var(--sunken); border-color: var(--sunken); }
+  button.panel { width: 100%; text-align: left; display: block; }
+  button.panel:hover { border-color: var(--line-strong); }
+
+  .row { display: flex; align-items: center; gap: 12px; }
+  .grow { flex: 1; min-width: 0; }
+  .divider { height: 1px; background: var(--line); margin-left: 16px; }
+  .divider.full { margin-left: 0; }
+
+  .btn {
+    min-height: 52px; width: 100%; border-radius: var(--radius); border: 1px solid var(--ink);
+    background: var(--ink); color: var(--surface); font-weight: 600; font-size: 15px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 20px;
+  }
+  .btn:hover { background: #2A2E33; }
+  .btn svg { width: 20px; height: 20px; }
+  .btn.outline { background: var(--surface); color: var(--ink); border-color: var(--line-strong); }
+  .btn.outline:hover { background: var(--sunken); }
+  .btn[disabled] { background: var(--line-strong); border-color: var(--line-strong); cursor: default; }
+  .link-btn { border: 0; background: none; font-weight: 600; font-size: 14px; color: var(--ink); padding: 12px 8px; min-height: 48px; border-radius: 8px; }
+  .link-btn:hover { background: var(--sunken); }
+  .link-btn.danger { color: var(--error); }
+
+  .notice { border-radius: var(--radius); padding: 12px; display: flex; gap: 8px; font-size: 14px; line-height: 1.45; }
+  .notice svg { width: 20px; height: 20px; flex: none; margin-top: 1px; }
+  .notice.info { background: var(--sunken); color: var(--graphite); }
+  .notice.success { background: var(--success-soft); color: var(--success); }
+  .notice.warning { background: var(--warning-soft); color: var(--warning); }
+  .notice.error { background: var(--error-soft); color: var(--error); }
+
+  .entry { display: flex; align-items: center; gap: 12px; padding: 12px 16px; min-height: 64px; width: 100%; border: 0; background: none; text-align: left; }
+  button.entry:hover { background: #FAF9F7; }
+  .entry .name { font-size: 16px; font-weight: 600; }
+  .entry .line { font-size: 14px; color: var(--graphite); margin-top: 2px; }
+  .entry .rm { text-align: right; }
+  .entry .rm b { font-size: 16px; font-weight: 600; display: block; }
+  .chev { width: 20px; height: 20px; color: var(--slate); flex: none; }
+
+  .field { margin-top: 12px; }
+  .field label { display: block; font-size: 13px; color: var(--slate); margin: 0 0 6px 2px; }
+  .input {
+    width: 100%; height: 52px; border-radius: var(--radius); border: 1px solid var(--line-strong);
+    background: var(--surface); padding: 0 14px; font-size: 16px; outline: none;
+  }
+  .input:focus { border: 1.5px solid var(--ink); padding: 0 13.5px; }
+  .input.bad { border-color: var(--error); }
+  .err { color: var(--error); font-size: 12px; margin: 6px 2px 0; }
+  .search { position: relative; }
+  .search svg { position: absolute; left: 14px; top: 15px; width: 22px; height: 22px; color: var(--slate); }
+  .search .input { padding-left: 46px; }
+
+  .stepper { display: grid; grid-template-columns: 56px 1fr 56px; gap: 8px; align-items: center; }
+  .stepper button {
+    height: 56px; border-radius: var(--radius); border: 1px solid var(--line-strong); background: var(--surface);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .stepper button:hover { background: var(--sunken); }
+  .stepper button svg { width: 22px; height: 22px; }
+  .stepper .wrap { position: relative; }
+  .stepper .input { height: 56px; text-align: center; font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .stepper .unit { position: absolute; right: 14px; top: 18px; color: var(--slate); font-size: 14px; }
+
+  .segmented { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line-strong); border-radius: var(--radius); overflow: hidden; }
+  .segmented button { border: 0; background: var(--surface); min-height: 46px; font-weight: 600; font-size: 14px; color: var(--graphite); }
+  .segmented button + button { border-left: 1px solid var(--line-strong); }
+  .segmented button.on { background: var(--ink); color: var(--surface); }
+
+  .stat .v { font-size: 24px; font-weight: 600; letter-spacing: -.3px; font-variant-numeric: tabular-nums; }
+  .stat .v.accent { color: var(--accent); }
+  .stat .u { font-size: 12px; color: var(--slate); margin-left: 3px; font-weight: 400; letter-spacing: 0; }
+  .stat .k { font-size: 12px; color: var(--slate); margin-bottom: 2px; }
+
+  .progress-track { height: 8px; border-radius: 4px; background: var(--sunken); overflow: hidden; margin-top: 12px; }
+  .progress-track i { display: block; height: 100%; background: var(--ink); border-radius: 4px; transition: width .3s; }
+  .progress-track.done i { background: var(--success); }
+
+  .datechip { width: 52px; flex: none; border-radius: 8px; background: var(--sunken); text-align: center; padding: 8px 0; }
+  .datechip .d { font-size: 20px; font-weight: 600; line-height: 1.1; }
+
+  .empty { text-align: center; padding: 40px 20px; }
+  .empty .circle { width: 56px; height: 56px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); display: inline-flex; align-items: center; justify-content: center; color: var(--graphite); }
+  .empty .circle svg { width: 24px; height: 24px; }
+  .empty h3 { font-size: 16px; margin: 16px 0 4px; }
+  .empty p { margin: 0; color: var(--slate); font-size: 14px; line-height: 1.5; }
+
+  .avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--ink); color: var(--surface); display: flex; align-items: center; justify-content: center; font-weight: 600; flex: none; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+
+  /* ---------- Overlays ---------- */
+  .scrim { position: absolute; inset: 0; background: rgba(28,31,35,.38); display: flex; align-items: flex-end; z-index: 20; animation: fade .15s ease-out; }
+  .scrim.center { align-items: center; justify-content: center; padding: 24px; }
+  .sheet { width: 100%; background: var(--surface); border-radius: 22px 22px 0 0; padding: 10px 24px 24px; max-height: 80%; overflow-y: auto; animation: up .2s ease-out; }
+  .sheet .handle { width: 32px; height: 4px; border-radius: 2px; background: var(--line-strong); margin: 0 auto 18px; }
+  .sheet h3 { font-size: 20px; margin: 0 0 4px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 24px; }
+  .chip { width: 48px; height: 48px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); font-weight: 600; font-size: 16px; }
+  .chip.on { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+  .dialog { background: var(--surface); border-radius: 16px; padding: 22px 22px 10px; width: 100%; max-width: 320px; }
+  .dialog h3 { margin: 0 0 8px; font-size: 18px; }
+  .dialog .actions { display: flex; justify-content: flex-end; gap: 4px; margin-top: 12px; }
+  .pick { display: flex; align-items: center; width: 100%; border: 0; background: none; padding: 14px 4px; border-bottom: 1px solid var(--line); text-align: left; font-size: 16px; }
+  .pick:hover { background: #FAF9F7; }
+
+  .toast {
+    position: absolute; left: 16px; right: 16px; bottom: 150px; z-index: 30;
+    background: var(--ink); color: var(--surface); border-radius: var(--radius);
+    padding: 12px 8px 12px 16px; display: flex; align-items: center; gap: 8px; font-size: 14px;
+    animation: up .2s ease-out;
+  }
+  .toast button { border: 0; background: none; color: var(--accent-soft); font-weight: 700; font-size: 14px; padding: 8px; min-height: 40px; white-space: nowrap; }
+  @keyframes fade { from { opacity: 0; } }
+  @keyframes up { from { transform: translateY(16px); opacity: 0; } }
+  .spin { animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="stage">
+  <aside class="review">
+    <h1><span class="mark"><i></i><i></i><i></i></span>REP RANK</h1>
+    <p>Clickable UI prototype for CS 3354, Team 03. Uses sample data that resets when you reload. Nothing is saved or sent anywhere.</p>
+    <div class="label">Jump to a screen</div>
+    <ul id="jump"></ul>
+    <div class="note">Tip: you can also click through normally, starting at Sign in.<br>Author: Anshika</div>
+  </aside>
+  <div class="phone"><div class="app" id="app"></div></div>
+</div>
+
+<script>
+// Rep Rank UI prototype — Author: Anshika
+// Everything below is fake, in-memory sample data for demonstrating the UI.
+
+/* ---------------- Icons ---------------- */
+const ICON = {
+  back: '<path d="M15 18l-6-6 6-6"/>',
+  chev: '<path d="M9 6l6 6-6 6"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  minus: '<path d="M5 12h14"/>',
+  search: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>',
+  close: '<path d="M6 6l12 12M18 6L6 18"/>',
+  trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
+  dumbbell: '<path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/>',
+  history: '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/>',
+  chart: '<path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/>',
+  user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>',
+  flag: '<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>',
+  info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
+  check: '<circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/>',
+  alert: '<circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16h.01"/>',
+  sync: '<path d="M20 11a8 8 0 0 0-14.3-4.9L4 8M4 13a8 8 0 0 0 14.3 4.9L20 16"/><path d="M4 4v4h4M20 20v-4h-4"/>',
+  calendar: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+  logout: '<path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/>',
+  eye: '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+  down: '<path d="M6 9l6 6 6-6"/>',
+  tick: '<path d="M5 12l5 5 9-10"/>',
+};
+const icon = (name, cls = '') =>
+  `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICON[name]}</svg>`;
+
+/* ---------------- Sample data ---------------- */
+const EXERCISES = [
+  ['bench_press', 'Bench Press', 'Chest', 'Barbell', 'flat bench'],
+  ['incline_bench_press', 'Incline Bench Press', 'Chest', 'Barbell', ''],
+  ['dumbbell_bench_press', 'Dumbbell Bench Press', 'Chest', 'Dumbbell', ''],
+  ['dumbbell_fly', 'Dumbbell Fly', 'Chest', 'Dumbbell', ''],
+  ['push_up', 'Push-Up', 'Chest', 'Bodyweight', 'pushup'],
+  ['deadlift', 'Deadlift', 'Back', 'Barbell', ''],
+  ['romanian_deadlift', 'Romanian Deadlift', 'Back', 'Barbell', 'rdl'],
+  ['barbell_row', 'Barbell Row', 'Back', 'Barbell', 'bent over row'],
+  ['pull_up', 'Pull-Up', 'Back', 'Bodyweight', 'pullup'],
+  ['lat_pulldown', 'Lat Pulldown', 'Back', 'Cable', ''],
+  ['seated_cable_row', 'Seated Cable Row', 'Back', 'Cable', ''],
+  ['back_squat', 'Back Squat', 'Legs', 'Barbell', 'squat'],
+  ['front_squat', 'Front Squat', 'Legs', 'Barbell', ''],
+  ['leg_press', 'Leg Press', 'Legs', 'Machine', ''],
+  ['walking_lunge', 'Walking Lunge', 'Legs', 'Dumbbell', 'lunge'],
+  ['leg_curl', 'Lying Leg Curl', 'Legs', 'Machine', 'hamstring curl'],
+  ['hip_thrust', 'Hip Thrust', 'Legs', 'Barbell', 'glute bridge'],
+  ['calf_raise', 'Standing Calf Raise', 'Legs', 'Machine', ''],
+  ['overhead_press', 'Overhead Press', 'Shoulders', 'Barbell', 'ohp military press'],
+  ['lateral_raise', 'Lateral Raise', 'Shoulders', 'Dumbbell', 'side raise'],
+  ['face_pull', 'Face Pull', 'Shoulders', 'Cable', ''],
+  ['barbell_curl', 'Barbell Curl', 'Arms', 'Barbell', 'bicep curl'],
+  ['hammer_curl', 'Hammer Curl', 'Arms', 'Dumbbell', ''],
+  ['triceps_pushdown', 'Triceps Pushdown', 'Arms', 'Cable', 'tricep'],
+  ['skull_crusher', 'Skull Crusher', 'Arms', 'Barbell', ''],
+  ['cable_crunch', 'Cable Crunch', 'Core', 'Cable', ''],
+  ['hanging_leg_raise', 'Hanging Leg Raise', 'Core', 'Bodyweight', ''],
+  ['kettlebell_swing', 'Kettlebell Swing', 'Full body', 'Kettlebell', ''],
+].map(([id, name, cat, eq, alias]) => ({ id, name, cat, eq, alias }));
+const EX = Object.fromEntries(EXERCISES.map(e => [e.id, e]));
+
+const pad = n => String(n).padStart(2, '0');
+const key = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const daysAgo = n => { const d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() - n); return d; };
+const parseKey = k => { const [y, m, d] = k.split('-').map(Number); return new Date(y, m - 1, d, 12); };
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const longDate = d => `${DAYS[d.getDay()]}, ${MONTHS[d.getMonth()]} ${d.getDate()}`;
+const shortDate = k => { const d = parseKey(k); return `${MONTHS[d.getMonth()].slice(0, 3)} ${d.getDate()}`; };
+const num = v => { const r = Math.round(v * 10) / 10; return Number.isInteger(r) ? String(r) : r.toFixed(1); };
+const oneRM = (w, r) => w * (1 + r / 30);          // FR-04
+const setLine = e => `${e.s} × ${e.r} @ ${num(e.w)} lb`;
+const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
+
+let uid = 0;
+const id = () => 'x' + (++uid);
+
+function sampleSessions() {
+  const plan = [
+    [27, [['bench_press', 135, 3, 8], ['barbell_row', 115, 3, 10]]],
+    [25, [['back_squat', 185, 5, 5], ['leg_curl', 70, 3, 12]]],
+    [22, [['bench_press', 140, 3, 8], ['overhead_press', 85, 3, 8]]],
+    [20, [['deadlift', 225, 3, 5], ['lat_pulldown', 110, 3, 10]]],
+    [18, [['bench_press', 140, 3, 9], ['triceps_pushdown', 50, 3, 12]]],
+    [15, [['back_squat', 195, 5, 5], ['walking_lunge', 35, 3, 10]]],
+    [13, [['bench_press', 145, 3, 8], ['barbell_row', 120, 3, 10]]],
+    [11, [['deadlift', 235, 3, 5], ['barbell_curl', 55, 3, 10]]],
+    [8, [['bench_press', 150, 3, 6], ['overhead_press', 90, 3, 6]]],
+    [6, [['back_squat', 205, 5, 5], ['hip_thrust', 185, 3, 10]]],
+    [4, [['bench_press', 150, 3, 8], ['lateral_raise', 20, 3, 15]]],
+    [2, [['deadlift', 245, 3, 5], ['seated_cable_row', 120, 3, 10]]],
+  ];
+  return plan.map(([ago, list]) => ({
+    id: id(), date: key(daysAgo(ago)),
+    entries: list.map(([ex, w, s, r]) => ({ id: id(), ex, w, s, r })),
+  }));
+}
+
+/* ---------------- State ---------------- */
+const fresh = () => ({
+  screen: 'signin', tab: 'today', authMode: 'signin', authError: null, authInfo: null,
+  email: 'anshika@utdallas.edu',
+  sessions: sampleSessions(), goal: 4,
+  query: '', pickedEx: null, editing: null, errors: {}, returnTo: 'today',
+  detailId: null, progressEx: 'bench_press',
+  sync: { state: 'up', at: Date.now() - 4 * 60000 },
+  overlay: null, toast: null,
+});
+let S = fresh();
+
+/* ---------------- Data helpers ---------------- */
+const todayKey = () => key(new Date());
+const todaySession = () => S.sessions.find(s => s.date === todayKey());
+const history = () => S.sessions.filter(s => s.entries.length).sort((a, b) => b.date.localeCompare(a.date));
+function lastPerformance(exId, skipId) {
+  for (const s of history()) {
+    const e = s.entries.slice().reverse().find(x => x.ex === exId && x.id !== skipId);
+    if (e) return { date: s.date, e };
+  }
+  return null;
+}
+function weekCount() {
+  const now = new Date(); const start = new Date(now); start.setHours(0, 0, 0, 0);
+  start.setDate(start.getDate() - ((start.getDay() + 6) % 7));            // Monday
+  const end = new Date(start); end.setDate(end.getDate() + 6);
+  return history().filter(s => s.date >= key(start) && s.date <= key(end)).length;
+}
+function progress(exId) {
+  const best = {};
+  for (const s of S.sessions) for (const e of s.entries) {
+    if (e.ex !== exId) continue;
+    const v = oneRM(e.w, e.r);
+    if (!best[s.date] || v > best[s.date].v) best[s.date] = { date: s.date, v, e };
+  }
+  return Object.values(best).sort((a, b) => a.date.localeCompare(b.date));
+}
+function search(q) {
+  const words = q.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+  if (!words.length) return EXERCISES;
+  const score = e => {
+    const text = (e.name + ' ' + e.alias).toLowerCase();
+    if (!words.every(w => text.includes(w))) return 0;
+    return e.name.toLowerCase().startsWith(q.trim().toLowerCase()) ? 3 : 1;
+  };
+  return EXERCISES.map(e => [e, score(e)]).filter(x => x[1]).sort((a, b) => b[1] - a[1] || a[0].name.localeCompare(b[0].name)).map(x => x[0]);
+}
+
+/* ---------------- Rendering ---------------- */
+const app = document.getElementById('app');
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const statusbar = () => `<div class="statusbar"><span class="num">9:41</span><span>●●● ▮</span></div>`;
+const wordmark = (lg = false) => `<span class="wordmark ${lg ? 'lg' : ''}"><span class="mark"><i></i><i></i><i></i></span>REP RANK</span>`;
+const appbar = (title, opts = {}) => `
+  <div class="appbar ${opts.back ? 'has-back' : ''}">
+    ${opts.back ? `<button class="icon-btn" data-a="back" aria-label="Back">${icon('back')}</button>` : ''}
+    <h2>${title}</h2>${opts.actions || ''}
+  </div>`;
+const notice = (kind, text) => `<div class="notice ${kind}">${icon({ info: 'info', success: 'check', warning: 'sync', error: 'alert' }[kind])}<div>${text}</div></div>`;
+const stat = (k, v, u, accent) => `<div class="stat"><div class="k">${k}</div><div class="v ${accent ? 'accent' : ''}">${v}${u ? `<span class="u">${u}</span>` : ''}</div></div>`;
+const entryRow = (e, action) => `
+  <button class="entry" data-a="${action}" data-id="${e.id}">
+    <div class="grow"><div class="name">${EX[e.ex].name}</div><div class="line num">${setLine(e)}</div></div>
+    <div class="rm"><b class="num">${num(oneRM(e.w, e.r))}</b><span class="small">est. 1RM</span></div>
+    ${icon('chev', 'chev')}
+  </button>`;
+const tabbar = () => {
+  const tabs = [['today', 'Today', 'dumbbell'], ['history', 'History', 'history'], ['progress', 'Progress', 'chart'], ['account', 'Account', 'user']];
+  return `<nav class="tabbar">${tabs.map(([k, l, i]) =>
+    `<button class="tab ${S.tab === k ? 'active' : ''}" data-a="tab" data-id="${k}"><span class="pill">${icon(i)}</span>${l}</button>`).join('')}</nav>`;
+};
+
+const SCREENS = {
+  /* UC-04 / UC-05 */
+  signin() {
+    const reg = S.authMode === 'register';
+    return `${statusbar()}
+    <div class="content" style="display:flex;flex-direction:column;justify-content:center;padding:24px">
+      ${wordmark(true)}
+      <div style="font-size:24px;font-weight:600;margin:28px 0 4px">${reg ? 'Create your account' : 'Sign in'}</div>
+      <div class="body muted">${reg ? 'Your workouts are saved to your account so you can open them on any device.' : 'Sign in to see your workouts on this device.'}</div>
+      <div style="height:24px"></div>
+      <div class="segmented">
+        <button class="${reg ? '' : 'on'}" data-a="authMode" data-id="signin">Sign in</button>
+        <button class="${reg ? 'on' : ''}" data-a="authMode" data-id="register">Create account</button>
+      </div>
+      <div class="field"><label for="email">Email</label><input class="input" id="email" type="email" value="${esc(S.email)}" autocomplete="email"></div>
+      <div class="field"><label for="pw">Password</label><input class="input" id="pw" type="password" value="${reg ? '' : 'password123'}" placeholder="${reg ? 'At least 8 characters' : ''}"></div>
+      ${S.authError ? `<div style="margin-top:12px">${notice('error', S.authError)}</div>` : ''}
+      ${S.authInfo ? `<div style="margin-top:12px">${notice('success', S.authInfo)}</div>` : ''}
+      <div style="height:24px"></div>
+      <button class="btn" data-a="submitAuth">${reg ? 'Create account' : 'Sign in'}</button>
+      <div class="small" style="text-align:center;margin-top:16px">Prototype: try the password <b>wrong</b> to see the error message.</div>
+    </div>`;
+  },
+
+  /* UC-01 step 0 + FR-05 */
+  today() {
+    const t = todaySession();
+    const done = weekCount();
+    const goalCard = S.goal
+      ? `<button class="panel pad" data-a="goal">
+          <div class="row"><span class="eyebrow grow">This week</span>
+            <span style="font-size:13px;font-weight:600;color:${done >= S.goal ? 'var(--success)' : 'var(--slate)'}">${done >= S.goal ? 'Goal reached' : 'Edit goal'}</span></div>
+          <div style="margin-top:8px"><span class="num" style="font-size:36px;font-weight:600;letter-spacing:-.5px">${done}</span>
+            <span style="color:var(--graphite)">&nbsp; of ${S.goal} workouts</span></div>
+          <div class="progress-track ${done >= S.goal ? 'done' : ''}"><i style="width:${Math.min(100, done / S.goal * 100)}%"></i></div>
+        </button>`
+      : `<button class="panel pad" data-a="goal"><div class="row">${icon('flag', 'chev')}<span class="grow" style="font-weight:600">Set a weekly workout goal</span>${icon('chev', 'chev')}</div></button>`;
+    const list = t && t.entries.length
+      ? `<div class="panel">${t.entries.map((e, i) => (i ? '<div class="divider"></div>' : '') + entryRow(e, 'editEntry')).join('')}
+          <div class="divider full"></div>
+          <div class="row" style="padding:12px 16px"><span class="small grow">${plural(t.entries.length, 'exercise')}</span><span class="small">${plural(t.entries.reduce((n, e) => n + e.s, 0), 'set')} total</span></div></div>`
+      : `<div class="panel pad"><div style="font-weight:600">No exercises recorded yet</div>
+          <div class="body muted" style="margin-top:4px">Tap Record exercise, find the exercise by name, then enter the weight, sets and reps.</div></div>`;
+    return `${statusbar()}${appbar(wordmark())}
+      <div class="content">
+        <div class="eyebrow">Today</div>
+        <div class="h-date">${longDate(new Date())}</div>
+        ${goalCard}
+        <div class="section-label"><span class="eyebrow">Today's workout</span><button class="link-btn" style="min-height:32px;padding:4px 8px" data-a="tab" data-id="history">History</button></div>
+        ${list}
+        ${lastWorkout()}
+      </div>
+      <div class="actionbar"><button class="btn" data-a="startRecord">${icon('plus')}Record exercise</button></div>
+      ${tabbar()}`;
+  },
+
+  /* UC-01 steps 2–5, FR-10 */
+  search() {
+    return `${statusbar()}${appbar('Choose exercise', { back: true })}
+      <div style="padding:4px 16px 8px"><div class="search">${icon('search')}<input class="input" id="q" placeholder="Exercise name, e.g. bench or squat" value="${esc(S.query)}" autocomplete="off"></div></div>
+      <div class="content" id="results" style="padding:0">${this.results()}</div>`;
+  },
+  results() {
+    const list = search(S.query);
+    if (!list.length) return `<div class="empty"><span class="circle">${icon('search')}</span><h3>No exercises match "${esc(S.query.trim())}"</h3><p>Check the spelling or try a shorter name, such as "row" or "press".</p></div>`;
+    return `<div class="eyebrow" style="padding:8px 16px">${S.query.trim() ? list.length + ' matching' : 'All exercises'}</div>` +
+      list.map((e, i) => `${i ? '<div class="divider"></div>' : ''}
+        <button class="entry" data-a="pickEx" data-id="${e.id}"><div class="grow"><div class="name">${e.name}</div><div class="small">${e.cat} · ${e.eq}</div></div>${icon('chev', 'chev')}</button>`).join('');
+  },
+
+  /* UC-01 steps 6–8, A2–A4 */
+  record() {
+    const ex = EX[S.pickedEx]; const edit = S.editing;
+    const prev = lastPerformance(ex.id, edit && edit.id);
+    const v = edit || (prev ? prev.e : { w: '', s: '', r: '' });
+    const prevBlock = prev
+      ? `<div class="panel pad sunken"><div class="row"><div class="grow"><div class="eyebrow">Last time · ${shortDate(prev.date)}</div>
+          <div class="num" style="font-size:20px;font-weight:600;margin-top:4px">${setLine(prev.e)}</div></div>${stat('est. 1RM', num(oneRM(prev.e.w, prev.e.r)), 'lb')}</div></div>`
+      : notice('info', "No previous record for this exercise. Enter today's values to start your history.");
+    const stepper = (fid, label, val, unit) => `
+      <div class="field"><label for="${fid}">${label}</label>
+        <div class="stepper">
+          <button data-a="step" data-id="${fid}" data-d="-1" aria-label="Decrease ${label}">${icon('minus')}</button>
+          <div class="wrap"><input class="input ${S.errors[fid] ? 'bad' : ''}" id="${fid}" inputmode="decimal" value="${val === '' ? '' : num(val)}">${unit ? `<span class="unit">${unit}</span>` : ''}</div>
+          <button data-a="step" data-id="${fid}" data-d="1" aria-label="Increase ${label}">${icon('plus')}</button>
+        </div>${S.errors[fid] ? `<div class="err">${S.errors[fid]}</div>` : ''}</div>`;
+    return `${statusbar()}${appbar(edit ? 'Edit entry' : 'Record exercise', { back: true, actions: edit ? `<button class="icon-btn" data-a="askDelete" aria-label="Delete entry">${icon('trash')}</button>` : '' })}
+      <div class="content">
+        <div style="font-size:24px;font-weight:600;letter-spacing:-.3px">${ex.name}</div>
+        <div class="small" style="margin:2px 0 16px">${ex.cat} · ${ex.eq}</div>
+        ${prevBlock}
+        <div class="section-label"><span class="eyebrow">Today's values</span></div>
+        ${stepper('w', 'Weight', v.w, 'lb')}${stepper('s', 'Sets', v.s)}${stepper('r', 'Reps per set', v.r)}
+        <div class="row" style="margin-top:18px;align-items:flex-start" id="estimate">${this.estimate()}</div>
+        <div style="margin-top:14px"><button class="link-btn" style="padding:4px 0;min-height:32px;color:var(--slate);font-weight:500;font-size:12px" data-a="simulateFail">Prototype: simulate a save failure</button></div>
+      </div>
+      <div class="actionbar">${S.saveFailed ? `<div style="margin-bottom:8px">${notice('error', 'The entry was not saved. Your values are kept — try saving again.')}</div>` : ''}<button class="btn" data-a="save">${edit ? 'Save changes' : 'Save entry'}</button></div>`;
+  },
+  estimate() {
+    const w = parseFloat(val('w')), r = parseInt(val('r'), 10);
+    const prev = S.pickedEx && lastPerformance(S.pickedEx, S.editing && S.editing.id);
+    const est = w > 0 && r > 0 ? oneRM(w, r) : null;
+    const up = est && prev && est > oneRM(prev.e.w, prev.e.r);
+    return `<div class="small grow" style="line-height:1.5">Estimated 1RM = weight × (1 + reps ÷ 30). An estimate from your logged lift, not a fitness assessment.</div>
+      ${stat(up ? 'est. 1RM · above last' : 'est. 1RM', est ? num(est) : '—', est ? 'lb' : '', up)}`;
+  },
+
+  /* UC-02 */
+  history() {
+    const list = history();
+    const warn = S.sync.state === 'failed'
+      ? `<div style="margin-bottom:12px">${notice('warning', 'Recent workouts from your other devices may be missing. Sync from Account to try again.')}</div>` : '';
+    const rows = list.length ? list.map(s => {
+      const d = parseKey(s.date);
+      const names = [...new Set(s.entries.map(e => EX[e.ex].name))].join(', ');
+      return `<button class="panel" style="padding:12px 16px;margin-bottom:8px" data-a="openDetail" data-id="${s.id}">
+        <div class="row" style="gap:16px">
+          <div class="datechip"><div class="eyebrow">${DAYS[d.getDay()].slice(0, 3)}</div><div class="d num">${d.getDate()}</div></div>
+          <div class="grow"><div style="font-weight:600">${shortDate(s.date)}</div>
+            <div style="font-size:14px;color:var(--graphite);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${names}</div>
+            <div class="small" style="margin-top:2px">${plural(s.entries.length, 'exercise')} · ${plural(s.entries.reduce((n, e) => n + e.s, 0), 'set')}</div></div>
+          ${icon('chev', 'chev')}</div></button>`;
+    }).join('') : `<div class="empty"><span class="circle">${icon('calendar')}</span><h3>No workout history yet</h3><p>Workouts you record will appear here, newest first.</p></div>`;
+    return `${statusbar()}${appbar('Workout history')}<div class="content">${warn}${rows}</div>${tabbar()}`;
+  },
+  detail() {
+    const s = S.sessions.find(x => x.id === S.detailId);
+    if (!s || !s.entries.length) return `${statusbar()}${appbar('Workout', { back: true })}<div class="content"><div class="empty"><span class="circle">${icon('calendar')}</span><h3>This workout has no entries</h3><p>Its exercises were deleted.</p></div></div>`;
+    return `${statusbar()}${appbar(longDate(parseKey(s.date)), { back: true })}
+      <div class="content">
+        <div class="row" style="gap:40px;margin:4px 0 8px">${stat('Exercises', s.entries.length)}${stat('Sets', s.entries.reduce((n, e) => n + e.s, 0))}</div>
+        <div class="section-label"><span class="eyebrow">Exercises</span></div>
+        <div class="panel">${s.entries.map((e, i) => (i ? '<div class="divider"></div>' : '') + entryRow(e, 'editEntry')).join('')}</div>
+        <div class="small" style="margin-top:12px">Tap an exercise to correct or delete it.</div>
+      </div>`;
+  },
+
+  /* UC-03, FR-04 */
+  progress() {
+    const logged = [...new Set(S.sessions.flatMap(s => s.entries.map(e => e.ex)))].map(i => EX[i]).sort((a, b) => a.name.localeCompare(b.name));
+    if (!logged.length) return `${statusbar()}${appbar('Progress')}<div class="content"><div class="empty"><span class="circle">${icon('chart')}</span><h3>No progress to show yet</h3><p>Record an exercise on two or more days to see how your estimated 1RM changes.</p></div></div>${tabbar()}`;
+    if (!logged.some(e => e.id === S.progressEx)) S.progressEx = logged[0].id;
+    const pts = progress(S.progressEx);
+    const first = pts[0], last = pts[pts.length - 1], best = pts.reduce((a, b) => b.v > a.v ? b : a);
+    const change = last.v - first.v;
+    return `${statusbar()}${appbar('Progress')}
+      <div class="content">
+        <button class="panel pad" data-a="pickProgress"><div class="row"><div class="grow"><div class="eyebrow">Exercise</div>
+          <div style="font-weight:600;font-size:16px;margin-top:2px">${EX[S.progressEx].name}</div></div>
+          <span style="font-weight:600;font-size:14px;color:var(--graphite)">Change</span>${icon('down', 'chev')}</div></button>
+        <div class="panel pad" style="margin-top:12px;display:flex;gap:28px;flex-wrap:wrap">
+          ${stat('Latest', num(last.v), 'lb')}${stat('Best', num(best.v), 'lb', true)}
+          ${stat('Since ' + shortDate(first.date), pts.length > 1 ? (change > 0 ? '+' : '') + num(change) : '—', pts.length > 1 ? 'lb' : '')}
+        </div>
+        <div class="panel" style="margin-top:12px;padding:16px 12px 10px 4px">
+          <div class="eyebrow" style="padding-left:12px;margin-bottom:10px">Estimated 1RM (lb) by date</div>
+          ${chart(pts)}
+        </div>
+        <div class="small" style="margin-top:12px;line-height:1.5">Estimated 1RM = weight × (1 + reps ÷ 30), using the best set logged each day. It is an estimate from the numbers you entered, not a measure of health or fitness.</div>
+        <div class="section-label"><span class="eyebrow">By date</span></div>
+        <div class="panel">${pts.slice().reverse().map((p, i) => `${i ? '<div class="divider"></div>' : ''}
+          <div class="row" style="padding:12px 16px"><span style="width:64px;font-size:14px">${shortDate(p.date)}</span>
+          <span class="grow num" style="font-size:14px;color:var(--graphite)">${setLine(p.e)}</span><b class="num">${num(p.v)}</b></div>`).join('')}</div>
+      </div>${tabbar()}`;
+  },
+
+  /* UC-05 sync, UC-06 goal, sign out */
+  account() {
+    const sy = S.sync;
+    const ago = Math.max(0, Math.round((Date.now() - sy.at) / 60000));
+    const desc = {
+      up: ['Up to date', `Last synced ${ago < 1 ? 'just now' : ago + ' min ago'}.`, 'var(--success)'],
+      syncing: ['Syncing…', 'Exchanging records with your account.', 'var(--graphite)'],
+      failed: ['Sync failed', 'Saved records could not be synced right now. They are kept on this device.', 'var(--error)'],
+    }[sy.state];
+    return `${statusbar()}${appbar('Account')}
+      <div class="content">
+        <div class="panel pad"><div class="row"><div class="avatar">${esc(S.email[0] || '?').toUpperCase()}</div>
+          <div class="grow"><div style="font-weight:600;overflow:hidden;text-overflow:ellipsis">${esc(S.email)}</div><div class="small">Rep Rank account</div></div></div></div>
+        <div class="section-label"><span class="eyebrow">Sync</span></div>
+        <div class="panel pad">
+          <div class="row"><span class="dot" style="background:${desc[2]}"></span><span class="grow" style="font-weight:600">${desc[0]}</span>
+            <button class="link-btn" style="min-height:36px;padding:6px 8px" data-a="syncNow" ${sy.state === 'syncing' ? 'disabled' : ''}>${sy.state === 'syncing' ? icon('sync', 'chev spin') : 'Sync now'}</button></div>
+          <div class="body" style="color:var(--graphite);margin-top:4px">${desc[1]}</div>
+          <button class="link-btn" style="padding:4px 0;min-height:28px;color:var(--slate);font-weight:500;font-size:12px;margin-top:6px" data-a="simulateSyncFail">Prototype: simulate a failed sync</button>
+        </div>
+        <div class="section-label"><span class="eyebrow">Weekly goal</span></div>
+        <button class="panel pad" data-a="goal"><div class="row">${icon('flag', 'chev')}<span class="grow" style="font-weight:600">${S.goal ? S.goal + ' workouts per week' : 'No goal set'}</span><span style="font-weight:600;font-size:14px">${S.goal ? 'Change' : 'Set'}</span></div></button>
+        <div class="section-label"><span class="eyebrow">Privacy</span></div>
+        <div class="body" style="color:var(--graphite)">Rep Rank stores your workouts on this device and in your private cloud records. Other users cannot read them. Rep Rank tracks the numbers you enter; it does not give medical or health advice.</div>
+        <div style="height:28px"></div>
+        <button class="btn outline" data-a="signOut">${icon('logout')}Sign out</button>
+      </div>${tabbar()}`;
+  },
+};
+
+/* Most recent earlier workout, shown under today's workout */
+function lastWorkout() {
+  const s = history().find(x => x.date !== todayKey());
+  if (!s) return '';
+  return `<div class="section-label"><span class="eyebrow">Last workout · ${shortDate(s.date)}</span></div>
+    <button class="panel" data-a="openDetail" data-id="${s.id}">${s.entries.map((e, i) => (i ? '<div class="divider"></div>' : '') +
+      `<div class="row" style="padding:12px 16px"><span class="grow" style="font-weight:600">${EX[e.ex].name}</span><span class="num" style="font-size:14px;color:var(--graphite)">${setLine(e)}</span></div>`).join('')}</button>`;
+}
+
+/* Progress line chart (SVG) */
+function chart(pts) {
+  const W = 330, H = 210, L = 40, R = 14, T = 10, B = 28;
+  const vals = pts.map(p => p.v);
+  let lo = Math.min(...vals), hi = Math.max(...vals);
+  const padv = Math.max((hi - lo) * 0.15, 5); lo = Math.max(0, lo - padv); hi += padv;
+  const raw = (hi - lo) / 3, mag = Math.pow(10, Math.floor(Math.log10(raw))), n = raw / mag;
+  const step = (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * mag;
+  lo = Math.floor(lo / step) * step; hi = Math.ceil(hi / step) * step;
+  const x = i => pts.length === 1 ? (L + W - R) / 2 : L + (W - L - R) * i / (pts.length - 1);
+  const y = v => T + (H - T - B) * (1 - (v - lo) / (hi - lo));
+  let g = '';
+  for (let i = 0; i <= 4; i++) {
+    const v = lo + (hi - lo) * i / 4, yy = y(v);
+    g += `<line x1="${L}" x2="${W - R}" y1="${yy}" y2="${yy}" stroke="var(--line)"/><text x="${L - 8}" y="${yy + 4}" text-anchor="end">${num(v)}</text>`;
+  }
+  const line = pts.map((p, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(p.v).toFixed(1)}`).join(' ');
+  const area = pts.length > 1 ? `${line} L${x(pts.length - 1)},${H - B} L${x(0)},${H - B} Z` : '';
+  const labels = [...new Set([0, Math.floor((pts.length - 1) / 2), pts.length - 1])].map(i =>
+    `<text x="${Math.min(Math.max(x(i), L + 14), W - R - 14)}" y="${H - 8}" text-anchor="middle">${shortDate(pts[i].date)}</text>`).join('');
+  const dots = pts.map((p, i) => {
+    const lastPt = i === pts.length - 1;
+    return `<circle cx="${x(i)}" cy="${y(p.v)}" r="${lastPt ? 5.5 : 4}" fill="${lastPt ? 'var(--accent)' : 'var(--surface)'}" stroke="var(--accent)" stroke-width="2"><title>${shortDate(p.date)}: ${num(p.v)} lb</title></circle>`;
+  }).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Estimated one-rep max by date" style="font-size:11px;fill:var(--slate);display:block">
+    ${g}<path d="${area}" fill="var(--accent-soft)" opacity=".7"/><path d="${line}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>${dots}${labels}</svg>`;
+}
+
+/* Overlays */
+function overlay() {
+  const o = S.overlay; if (!o) return '';
+  if (o.type === 'goal') return `<div class="scrim" data-a="closeOverlay"><div class="sheet" data-stop>
+      <div class="handle"></div><h3>Weekly workout goal</h3>
+      <div class="body muted">How many workouts do you want to complete each week? Progress resets every Monday.</div>
+      <div class="chips">${[1, 2, 3, 4, 5, 6, 7].map(n => `<button class="chip ${o.pick === n ? 'on' : ''}" data-a="goalPick" data-id="${n}">${n}</button>`).join('')}</div>
+      <button class="btn" data-a="goalSave">Save goal: ${o.pick} per week</button>
+      ${S.goal ? `<div style="text-align:center;margin-top:6px"><button class="link-btn" data-a="goalClear">Remove goal</button></div>` : ''}
+    </div></div>`;
+  if (o.type === 'pickProgress') {
+    const logged = [...new Set(S.sessions.flatMap(s => s.entries.map(e => e.ex)))].map(i => EX[i]).sort((a, b) => a.name.localeCompare(b.name));
+    return `<div class="scrim" data-a="closeOverlay"><div class="sheet" data-stop><div class="handle"></div><h3 style="margin-bottom:8px">Choose exercise</h3>
+      ${logged.map(e => `<button class="pick" data-a="setProgress" data-id="${e.id}"><span class="grow">${e.name}<br><span class="small">${e.cat}</span></span>${e.id === S.progressEx ? `<span style="color:var(--accent)">${icon('tick', 'chev')}</span>` : ''}</button>`).join('')}
+    </div></div>`;
+  }
+  if (o.type === 'delete') {
+    const e = S.editing;
+    return `<div class="scrim center" data-a="closeOverlay"><div class="dialog" data-stop><h3>Delete this entry?</h3>
+      <div class="body muted">${EX[e.ex].name}: ${setLine(e)}</div>
+      <div class="actions"><button class="link-btn" data-a="closeOverlay">Cancel</button><button class="link-btn danger" data-a="confirmDelete">Delete</button></div></div></div>`;
+  }
+  return '';
+}
+const toast = () => S.toast ? `<div class="toast"><span class="grow">${S.toast.text}</span>${S.toast.action ? `<button data-a="${S.toast.action}">${S.toast.label}</button>` : ''}</div>` : '';
+
+function render() {
+  app.innerHTML = SCREENS[S.screen]() + overlay() + toast();
+  if (S.screen === 'search') { const q = document.getElementById('q'); q.focus(); q.setSelectionRange(q.value.length, q.value.length); }
+  if (S.screen === 'record') document.getElementById('estimate').innerHTML = SCREENS.estimate();
+}
+const val = fid => { const el = document.getElementById(fid); return el ? el.value.trim() : ''; };
+
+/* ---------------- Navigation + actions ---------------- */
+let stack = [];
+function go(screen) { stack.push(S.screen); S.screen = screen; S.toast = null; render(); app.querySelector('.content')?.scrollTo(0, 0); }
+function back() { S.screen = stack.pop() || (S.user ? S.tab : 'signin'); S.errors = {}; S.saveFailed = false; render(); }
+let toastTimer;
+function showToast(t) { S.toast = t; clearTimeout(toastTimer); toastTimer = setTimeout(() => { S.toast = null; render(); }, 5000); }
+
+function validate() {
+  const errors = {};
+  const w = val('w'), s = val('s'), r = val('r');
+  const wn = Number(w), sn = Number(s), rn = Number(r);
+  if (!w) errors.w = 'Enter the weight you lifted.';
+  else if (!(wn > 0)) errors.w = 'Weight must be a number greater than 0.';
+  else if (wn > 2000) errors.w = 'Weight must be 2000 or less.';
+  if (!s) errors.s = 'Enter the number of sets.';
+  else if (!Number.isInteger(sn) || sn < 1 || sn > 50) errors.s = 'Use a whole number from 1 to 50.';
+  if (!r) errors.r = 'Enter the number of reps.';
+  else if (!Number.isInteger(rn) || rn < 1 || rn > 100) errors.r = 'Use a whole number from 1 to 100.';
+  return { errors, w: wn, s: sn, r: rn };
+}
+function keepInputs(fn) {   // re-render without losing typed values
+  const kept = { w: val('w'), s: val('s'), r: val('r') };
+  fn(); render();
+  for (const k in kept) { const el = document.getElementById(k); if (el) el.value = kept[k]; }
+  const est = document.getElementById('estimate'); if (est) est.innerHTML = SCREENS.estimate();
+}
+
+const ACTIONS = {
+  back,
+  tab: k => { S.tab = k; stack = []; S.screen = k; S.toast = null; render(); },
+  authMode: m => { S.authMode = m; S.authError = S.authInfo = null; S.email = val('email') || S.email; render(); },
+  submitAuth() {
+    const email = val('email'), pw = document.getElementById('pw').value;
+    S.email = email;
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) S.authError = 'Enter a valid email address.';
+    else if (S.authMode === 'register' && pw.length < 8) S.authError = 'Use a password of at least 8 characters.';
+    else if (S.authMode === 'signin' && pw === 'wrong') S.authError = 'That email and password do not match an account.';
+    else if (!pw) S.authError = 'Enter your password.';
+    else { S.user = email; S.authError = null; S.tab = 'today'; stack = []; S.screen = 'today'; render(); return; }
+    render();
+  },
+  goal() { S.overlay = { type: 'goal', pick: S.goal || 3 }; render(); },
+  goalPick: n => { S.overlay.pick = Number(n); render(); },
+  goalSave() { S.goal = S.overlay.pick; S.overlay = null; render(); },
+  goalClear() { S.goal = null; S.overlay = null; render(); },
+  closeOverlay() { S.overlay = null; render(); },
+  startRecord() { S.query = ''; S.editing = null; S.errors = {}; S.saveFailed = false; S.returnTo = 'today'; go('search'); },
+  pickEx(exId) { S.pickedEx = exId; S.errors = {}; S.saveFailed = false; stack.pop(); stack.push('today'); S.screen = 'record'; render(); },
+  editEntry(entryId) {
+    const s = S.sessions.find(x => x.entries.some(e => e.id === entryId));
+    S.editing = s.entries.find(e => e.id === entryId); S.pickedEx = S.editing.ex; S.errors = {}; S.saveFailed = false; go('record');
+  },
+  step(fid, d) {
+    const el = document.getElementById(fid);
+    const cur = parseFloat(el.value) || 0, inc = fid === 'w' ? 5 : 1;
+    el.value = num(Math.max(0, cur + Number(d) * inc));
+    document.getElementById('estimate').innerHTML = SCREENS.estimate();
+  },
+  simulateFail() { S.failNext = true; showToast({ text: 'The next save will fail (prototype).' }); keepInputs(() => {}); },
+  save() {
+    S.toast = null; clearTimeout(toastTimer);
+    const v = validate();
+    if (Object.keys(v.errors).length) { keepInputs(() => { S.errors = v.errors; S.saveFailed = false; }); return; }
+    if (S.failNext) { S.failNext = false; keepInputs(() => { S.errors = {}; S.saveFailed = true; }); return; }
+    const ex = EX[S.pickedEx];
+    if (S.editing) {
+      Object.assign(S.editing, { w: v.w, s: v.s, r: v.r });
+      S.editing = null; S.errors = {}; back(); return;
+    }
+    let t = todaySession();
+    if (!t) { t = { id: id(), date: todayKey(), entries: [] }; S.sessions.push(t); }
+    const e = { id: id(), ex: ex.id, w: v.w, s: v.s, r: v.r };
+    t.entries.push(e);
+    S.errors = {}; stack = []; S.tab = 'today'; S.screen = 'today';
+    showToast({ text: `Saved ${ex.name}: ${setLine(e)}`, action: 'startRecord', label: 'Record another' });
+    render();
+  },
+  askDelete() { keepInputs(() => { S.overlay = { type: 'delete' }; }); },
+  confirmDelete() {
+    for (const s of S.sessions) s.entries = s.entries.filter(e => e.id !== S.editing.id);
+    S.overlay = null; S.editing = null; back(); showToast({ text: 'Entry deleted' }); render();
+  },
+  openDetail(sid) { S.detailId = sid; go('detail'); },
+  pickProgress() { S.overlay = { type: 'pickProgress' }; render(); },
+  setProgress(exId) { S.progressEx = exId; S.overlay = null; render(); },
+  syncNow() {
+    S.sync = { state: 'syncing', at: S.sync.at }; render();
+    setTimeout(() => { S.sync = { state: 'up', at: Date.now() }; if (S.screen === 'account') render(); }, 1200);
+  },
+  simulateSyncFail() { S.sync = { state: 'failed', at: S.sync.at }; render(); },
+  signOut() { const email = S.email; S = fresh(); S.email = email; stack = []; render(); },
+};
+
+app.addEventListener('click', ev => {
+  const stop = ev.target.closest('[data-stop]');
+  const el = ev.target.closest('[data-a]');
+  if (!el || (stop && !stop.contains(el))) return;
+  if (el.classList.contains('scrim') && ev.target !== el) return;
+  ACTIONS[el.dataset.a](el.dataset.id, el.dataset.d);
+});
+app.addEventListener('input', ev => {
+  if (ev.target.id === 'q') { S.query = ev.target.value; document.getElementById('results').innerHTML = SCREENS.results(); }
+  if (['w', 's', 'r'].includes(ev.target.id)) document.getElementById('estimate').innerHTML = SCREENS.estimate();
+});
+app.addEventListener('keydown', ev => { if (ev.key === 'Enter' && S.screen === 'signin') ACTIONS.submitAuth(); });
+
+/* Reviewer panel: jump straight to any screen */
+const JUMPS = [
+  ['Sign in / create account', 'UC-04, UC-05', () => { S = fresh(); stack = []; render(); }],
+  ['Today + weekly goal', 'UC-01, UC-06', () => { ensureIn(); ACTIONS.tab('today'); }],
+  ['Choose exercise (search)', 'UC-01, FR-10', () => { ensureIn(); ACTIONS.startRecord(); }],
+  ['Record exercise', 'UC-01, FR-01, FR-03', () => { ensureIn(); stack = ['today']; S.pickedEx = 'bench_press'; S.editing = null; S.errors = {}; S.screen = 'record'; render(); }],
+  ['Workout history', 'UC-02', () => { ensureIn(); ACTIONS.tab('history'); }],
+  ['Workout detail', 'UC-02', () => { ensureIn(); ACTIONS.tab('history'); ACTIONS.openDetail(history()[0].id); }],
+  ['Progress graph', 'UC-03, FR-04', () => { ensureIn(); ACTIONS.tab('progress'); }],
+  ['Account, sync, goal', 'UC-05, UC-06', () => { ensureIn(); ACTIONS.tab('account'); }],
+];
+function ensureIn() { if (!S.user) { S.user = S.email; } S.overlay = null; }
+document.getElementById('jump').innerHTML = JUMPS.map(([l, u], i) => `<li><button data-j="${i}">${l}<span>${u}</span></button></li>`).join('');
+document.getElementById('jump').addEventListener('click', ev => { const b = ev.target.closest('[data-j]'); if (b) JUMPS[b.dataset.j][2](); });
+
+render();
+</script>
+</body>
+</html>

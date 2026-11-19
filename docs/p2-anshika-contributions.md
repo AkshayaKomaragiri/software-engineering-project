@@ -4,7 +4,8 @@ Author: Anshika
 
 ## Section 4.1 Use cases selected for analysis (revised from Laxmi's draft)
 
-![alt text](image.png)
+<img width="502" height="234" alt="image" src="https://github.com/user-attachments/assets/2142a758-9595-4535-90fb-ba48e601e2f3" />
+
 
 ### Changes and reasons
 
@@ -15,16 +16,20 @@ Author: Anshika
 
 ## Section 4.2 Expanded use cases (revised from Laxmi's drafts)
 ### UC-01 Record Workout Session
-![alt text](image-1.png)
-![alt text](image-2.png)
+<img width="500" height="470" alt="image" src="https://github.com/user-attachments/assets/54cc94e7-79d0-461b-9476-33d9b23efddd" />
+
+<img width="497" height="332" alt="image" src="https://github.com/user-attachments/assets/3558845a-c638-4df2-ac63-712f3f7ccad0" />
 
 ### UC-05 Access Workout Records Across Devices
-![alt text](image-3.png)
-![alt text](image-4.png)
+<img width="505" height="381" alt="image" src="https://github.com/user-attachments/assets/15d4fa49-6fd2-4f80-ae2f-0cdee45e0d45" />
+<img width="506" height="311" alt="image" src="https://github.com/user-attachments/assets/fe4f9159-5d29-4738-8ec1-16b46f7ef34a" />
+
 
 ### UC-02 Review Workout History
-![alt text](image-5.png)
-![alt text](image-6.png)
+<img width="500" height="219" alt="image" src="https://github.com/user-attachments/assets/c158a140-bcab-4ccb-8fb1-4d5b3dd3cbd0" />
+
+<img width="508" height="405" alt="image" src="https://github.com/user-attachments/assets/2f69c21c-026c-46ba-9553-d92439f50e83" />
+
 
 ### Changes and reasons (4.2)
 
@@ -54,9 +59,14 @@ Author: Anshika
 
 ## Section 10.3 Risks (updated)
 
-![alt text](image7.png)
-![alt text](image8.png)
+<img width="499" height="320" alt="image" src="https://github.com/user-attachments/assets/b4509c4a-0812-409d-922c-4281cacee03e" />
+<img width="497" height="314" alt="image" src="https://github.com/user-attachments/assets/cfad149a-a911-4661-873e-d0addab767e6" />
+
 
 ## Section 10.4 Repository
 
-![alt text](image.png)
+<img width="524" height="363" alt="image" src="https://github.com/user-attachments/assets/d56a7758-b330-4770-9dc7-eb2d0b4b50c3" />
+
+
+## Section 0.2 
+<img width="521" height="484" alt="image" src="https://github.com/user-attachments/assets/1d5a23ff-ddbb-4ed9-bf8b-adac5dce32f2" />

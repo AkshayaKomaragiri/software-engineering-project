@@ -43,21 +43,26 @@ class MyApp extends StatelessWidget {
 
 // Switch between the authentication page and the user's notes page.
 class AuthGate extends StatefulWidget {
-  const AuthGate({super.key});
+  const AuthGate({super.key, this.auth, this.signedInBuilder});
+
+  final GoTrueClient? auth;
+  final Widget Function(BuildContext context, User user)? signedInBuilder;
 
   @override
   State<AuthGate> createState() => _AuthGateState();
 }
 
 class _AuthGateState extends State<AuthGate> {
+  late final GoTrueClient _auth;
   late final StreamSubscription<AuthState> _authSubscription;
   User? _user;
 
   @override
   void initState() {
     super.initState();
-    _user = supabase.auth.currentUser;
-    _authSubscription = supabase.auth.onAuthStateChange.listen(
+    _auth = widget.auth ?? supabase.auth;
+    _user = _auth.currentUser;
+    _authSubscription = _auth.onAuthStateChange.listen(
       (data) {
         if (!mounted) return;
         setState(() {
@@ -80,14 +85,18 @@ class _AuthGateState extends State<AuthGate> {
   Widget build(BuildContext context) {
     final user = _user;
     if (user == null) {
-      return const AuthPage();
+      return AuthPage(auth: _auth);
     }
+    final signedInBuilder = widget.signedInBuilder;
+    if (signedInBuilder != null) return signedInBuilder(context, user);
     return SqliteSpikePage(key: ValueKey(user.id), userId: user.id);
   }
 }
 
 class AuthPage extends StatefulWidget {
-  const AuthPage({super.key});
+  const AuthPage({super.key, this.auth});
+
+  final GoTrueClient? auth;
 
   @override
   State<AuthPage> createState() => _AuthPageState();
@@ -109,8 +118,9 @@ class _AuthPageState extends State<AuthPage> {
 
     setState(() => _busy = true);
     try {
+      final auth = widget.auth ?? supabase.auth;
       if (_createAccount) {
-        final response = await supabase.auth.signUp(
+        final response = await auth.signUp(
           email: email,
           password: password,
         );
@@ -119,7 +129,7 @@ class _AuthPageState extends State<AuthPage> {
           _showMessage('Account created. Check your email to confirm it, then sign in.');
         }
       } else {
-        await supabase.auth.signInWithPassword(
+        await auth.signInWithPassword(
           email: email,
           password: password,
         );
